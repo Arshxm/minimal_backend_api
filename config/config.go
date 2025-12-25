@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
@@ -19,20 +20,24 @@ type Config struct {
 }
 
 func Load() *Config {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+	cwd, _ := os.Getwd()
+	envPath := filepath.Join(cwd, ".env")
+
+	if err := godotenv.Load(envPath); err != nil {
+		log.Printf("ERROR loading .env file: %v", err)
 	}
 
-	return &Config{
+	cfg := &Config{
 		DBUser:     getEnv("DB_USER", "root"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
+		DBPassword: getEnv("DB_PASSWORD", "rootpassword"),
 		DBHost:     getEnv("DB_HOST", "127.0.0.1"),
-		DBPort:     getEnv("DB_PORT", "3306"),
+		DBPort:     getEnv("DB_PORT", "3307"),
 		DBName:     getEnv("DB_NAME", "ecom"),
 		ServerPort: getEnv("SERVER_PORT", "8080"),
 		APIPrefix:  getEnv("API_PREFIX", "/api/v1"),
 		Env:        getEnv("ENV", "development"),
 	}
+	return cfg
 }
 
 func getEnv(key, defaultValue string) string {
